@@ -75,4 +75,42 @@ class RecipeDraftTest {
         assertEquals(first.name, second.name)
         assertNotEquals(first.id, second.id)
     }
+    @Test fun existingRecipeRoundTripKeepsAllIdsValuesAndOrder() {
+        val recipe = validDraft().toRecipe()
+        val draft = recipe.toDraft()
+        assertEquals(recipe.id, draft.id)
+        assertEquals("0,5", draft.ingredients.last().grams)
+        assertEquals("24", draft.steps.last().hours)
+        assertEquals("30", draft.steps.last().minutes)
+        assertEquals(recipe, draft.toRecipe())
+    }
+    @Test fun editingDraftDoesNotMutateStoredRecipe() {
+        val recipe = validDraft().toRecipe()
+        val draft = recipe.toDraft().copy(name = "Anderes Brot", ingredients = emptyList())
+        assertEquals("Sauerteigbrot", recipe.name)
+        assertEquals(2, recipe.ingredients.size)
+        assertTrue(draft.validate().containsKey("ingredients"))
+    }
+    @Test fun smallAndLargeAmountsStayEditableWithoutRounding() {
+        listOf(Double.MIN_VALUE, 0.0000001, 0.000123456789, 0.1234567890123456, 500.0, 1_000_000.0).forEach { grams ->
+            val input = gramsForInput(grams)
+            assertFalse(input.contains('e', ignoreCase = true), input)
+            assertEquals(grams, parseGrams(input), input)
+        }
+        assertEquals("500", gramsForInput(500.0))
+    }
+    @Test fun editingRetainsUnchangedItemIdentitiesAfterReorderAndAdd() {
+        val recipe = validDraft().toRecipe()
+        val draft = recipe.toDraft().moveStep(recipe.steps.last().id, -1)
+        val updated = draft.copy(ingredients = draft.ingredients + IngredientDraft(name = "Salz", grams = "10")).toRecipe()
+        assertEquals(recipe.id, updated.id)
+        assertEquals(recipe.steps.reversed(), updated.steps)
+        assertEquals(recipe.ingredients, updated.ingredients.take(2))
+        assertFalse(recipe.ingredients.any { it.id == updated.ingredients.last().id })
+    }
+    @Test fun editRoundTripPreservesZeroAndMaximumStepDuration() {
+        val original = validDraft().copy(steps = listOf(StepDraft(title = "Ruhen", hours = "8760", minutes = "59"), StepDraft(title = "Fertig"))).toRecipe()
+        assertEquals(original, original.toDraft().toRecipe())
+    }
+
 }

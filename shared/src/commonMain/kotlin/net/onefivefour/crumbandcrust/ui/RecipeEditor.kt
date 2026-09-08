@@ -24,8 +24,8 @@ import kotlinx.coroutines.launch
 import net.onefivefour.crumbandcrust.recipe.*
 
 @Composable
-internal fun RecipeEditor(saving: Boolean, saveError: String?, onCancel: () -> Unit, onSave: (Recipe) -> Unit) {
-    var draft by remember { mutableStateOf(RecipeDraft()) }
+internal fun RecipeEditor(existingRecipe: Recipe? = null, saving: Boolean, saveError: String?, onCancel: () -> Unit, onSave: (Recipe) -> Unit) {
+    var draft by remember(existingRecipe?.id) { mutableStateOf(existingRecipe?.toDraft() ?: RecipeDraft()) }
     var attempted by remember { mutableStateOf(false) }
     val errors = if (attempted) draft.validate() else emptyMap()
     val scroll = rememberScrollState()
@@ -42,9 +42,10 @@ internal fun RecipeEditor(saving: Boolean, saveError: String?, onCancel: () -> U
                 Column(Modifier.widthIn(max = 820.dp).fillMaxWidth().padding(vertical = 28.dp)) {
                     Label("DEINE REZEPTSAMMLUNG")
                     Spacer(Modifier.height(8.dp))
-                    Heading("Neues Rezept")
+                    Heading(if (existingRecipe == null) "Neues Rezept" else "Rezept bearbeiten")
                     Spacer(Modifier.height(8.dp))
-                    Body("Halte fest, was dein Brot besonders macht. Felder mit * sind erforderlich.")
+                    Body(if (existingRecipe == null) "Halte fest, was dein Brot besonders macht. Felder mit * sind erforderlich."
+                        else "Passe dein Rezept an. Änderungen werden erst mit dem Speichern übernommen.")
                     Spacer(Modifier.height(20.dp))
                     if (errors.isNotEmpty()) {
                         Notice("Noch nicht gespeichert. Bitte prüfe die markierten Felder.")
@@ -137,7 +138,7 @@ internal fun RecipeEditor(saving: Boolean, saveError: String?, onCancel: () -> U
             Box(Modifier.fillMaxWidth().background(BreadColors.paper).padding(horizontal = gutter, vertical = 12.dp), contentAlignment = Alignment.Center) {
                 Row(Modifier.widthIn(max = 820.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     BreadButton("Abbrechen", onCancel, Modifier.weight(1f), secondary = true, enabled = !saving)
-                    BreadButton(if (saving) "Speichert …" else "Speichern", {
+                    BreadButton(if (saving) "Speichert …" else if (existingRecipe == null) "Speichern" else "Änderungen speichern", {
                         attempted = true
                         if (draft.validate().isEmpty()) onSave(draft.toRecipe())
                         else scope.launch { scroll.animateScrollTo(0) }

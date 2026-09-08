@@ -24,11 +24,10 @@ import net.onefivefour.crumbandcrust.recipe.formatDuration
 @Composable
 internal fun HomeScreen(
     recipes: List<Recipe>, loading: Boolean, loadError: String?, onRetry: () -> Unit,
-    onAddRecipe: () -> Unit, storageAvailable: Boolean, savedRecipe: Recipe?,
+    onAddRecipe: () -> Unit, onEditRecipe: (Recipe) -> Unit,
+    selectedRecipeId: String?, onSelectRecipe: (String) -> Unit, storageAvailable: Boolean, savedRecipe: Recipe?,
 ) {
-    var selectedId by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(savedRecipe?.id) { if (savedRecipe != null) selectedId = savedRecipe.id }
-    val selectedRecipe = recipes.firstOrNull { it.id == selectedId } ?: recipes.firstOrNull()
+    val selectedRecipe = recipes.firstOrNull { it.id == selectedRecipeId } ?: recipes.firstOrNull()
     BoxWithConstraints(Modifier.fillMaxSize().background(BreadColors.background).safeDrawingPadding()) {
         val twoColumns = maxWidth >= 840.dp
         val compact = maxWidth < 600.dp
@@ -56,14 +55,14 @@ internal fun HomeScreen(
                     if (twoColumns) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(28.dp), verticalAlignment = Alignment.Top) {
                             RecipeSection(Modifier.weight(.4f), recipes, selectedRecipe?.id, loading, loadError, onRetry,
-                                onAddRecipe, storageAvailable, onSelect = { selectedId = it })
-                            ScheduleSection(Modifier.weight(.6f), selectedRecipe)
+                                onAddRecipe, storageAvailable, onSelect = onSelectRecipe)
+                            ScheduleSection(Modifier.weight(.6f), selectedRecipe, onEditRecipe)
                         }
                     } else {
                         RecipeSection(Modifier.fillMaxWidth(), recipes, selectedRecipe?.id, loading, loadError, onRetry,
-                            onAddRecipe, storageAvailable, onSelect = { selectedId = it })
+                            onAddRecipe, storageAvailable, onSelect = onSelectRecipe)
                         Spacer(Modifier.height(28.dp))
-                        ScheduleSection(Modifier.fillMaxWidth(), selectedRecipe)
+                        ScheduleSection(Modifier.fillMaxWidth(), selectedRecipe, onEditRecipe)
                     }
                     Spacer(Modifier.height(28.dp))
                     Body("Mehl. Wasser. Zeit. Und ein guter Plan.", Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
@@ -133,7 +132,7 @@ private fun RecipeSection(
 }
 
 @Composable
-private fun ScheduleSection(modifier: Modifier, recipe: Recipe?) {
+private fun ScheduleSection(modifier: Modifier, recipe: Recipe?, onEditRecipe: (Recipe) -> Unit) {
     Column(modifier) {
         Box(Modifier.height(32.dp), contentAlignment = Alignment.CenterStart) { Label("DEIN BACKPLAN", Modifier.semantics { heading() }) }
         Spacer(Modifier.height(12.dp))
@@ -141,6 +140,10 @@ private fun ScheduleSection(modifier: Modifier, recipe: Recipe?) {
             Heading(recipe?.name ?: "Schritt für Schritt zum Brot")
             Spacer(Modifier.height(6.dp))
             Body(if (recipe == null) "Dein Rezept gibt den Rhythmus vor." else "In deiner Rezeptsammlung gespeichert.", small = true)
+            if (recipe != null) {
+                Spacer(Modifier.height(16.dp))
+                BreadButton("Rezept bearbeiten", { onEditRecipe(recipe) }, Modifier.fillMaxWidth(), secondary = true)
+            }
             Spacer(Modifier.height(22.dp))
             Divider()
             Column(Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {

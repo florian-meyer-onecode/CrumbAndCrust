@@ -41,7 +41,7 @@
                 transaction.onabort = () => reject(transaction.error || new Error("Storage transaction aborted."));
                 transaction.onerror = () => { /* IndexedDB aborts failed requests by default. */ };
                 try {
-                    const request = operation(transaction.objectStore(storeName));
+                    const request = operation(transaction.objectStore(storeName), transaction);
                     request.onsuccess = () => { result = request.result; };
                 } catch (error) {
                     transaction.abort();
@@ -56,6 +56,20 @@
     globalThis.CrumbRecipeStorage = Object.freeze({
         async load() {
             return JSON.stringify(await transact("readonly", store => store.getAll()));
+        },
+        async update(payload) {
+            const recipe = JSON.parse(payload);
+            if (!recipe || typeof recipe.id !== "string" || !recipe.id) throw new Error("Missing recipe identity.");
+            // Check existence and replace within one transaction. An update must not create a new recipe.
+            await transact("readwrite", (store, transaction) => {
+                const request = store.get(recipe.id);
+                request.addEventListener("success", () => {
+                    if (request.result === undefined) { transaction.abort(); return; }
+                    store.put(recipe);
+                });
+                return request;
+            });
+            return "saved";
         },
         async add(payload) {
             const recipe = JSON.parse(payload);

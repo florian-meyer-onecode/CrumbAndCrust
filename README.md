@@ -4,13 +4,12 @@ Brotrezepte und Backabläufe mit Compose Multiplatform für Web und Android.
 
 ## Stand
 
-Schritt 4: Rezepte im Browser anlegen und lokal in IndexedDB speichern.
-Das Formular erfasst Name, optionale Kurzbeschreibung, Zutaten in Gramm sowie
-geordnete Schritte mit optionaler Anleitung und Dauer in Stunden/Minuten.
-Zutaten und Schritte lassen sich hinzufügen oder entfernen; Schritte können
-verschoben werden. Gespeicherte Rezepte erscheinen in der Sammlung und bleiben
-nach Neuladen erhalten. Bearbeiten und die vollständige Ablaufanzeige folgen
-in den nächsten Freigabeschritten. Siehe [PLAN.md](PLAN.md).
+Schritt 5: Rezepte im Browser anlegen und bearbeiten, lokal in IndexedDB.
+Wähle ein Rezept aus der Sammlung und klicke auf „Rezept bearbeiten“. Dasselbe
+Formular übernimmt Name, Kurzbeschreibung, Zutaten, Arbeitsschritte und Dauern.
+„Änderungen speichern“ aktualisiert das bestehende Rezept unter derselben ID;
+Abbrechen verwirft den Entwurf. Die vollständige Ablaufanzeige folgt im nächsten
+Freigabeschritt. Siehe [PLAN.md](PLAN.md).
 
 ## Voraussetzungen
 
@@ -89,7 +88,7 @@ Siehe [JetBrains-Projektstruktur](https://kotlinlang.org/docs/multiplatform/mult
 
 Rezepte liegen in der IndexedDB-Datenbank `crumb-and-crust` (Version 1),
 Object Store `recipes`, mit einer unabhängigen UUID pro Rezept. Schreiben wird
-erst nach dem erfolgreichen Transaktionsabschluss bestätigt. Fehler überschreiben
+erst nach dem erfolgreichen Transaktionsabschluss bestätigt. Fehlgeschlagene Transaktionen verändern
 keine vorhandenen Rezepte; ein ungespeicherter Entwurf bleibt bei Speicherfehlern
 offen. Zutaten und Schritte haben ebenfalls stabile IDs, unabhängig von ihrer
 Position. Die gespeicherten Objekte tragen eine eigene Schema-Version.
@@ -211,3 +210,53 @@ Screenshots landen unter `build/browser-tests/`.
 - Testdaten bleiben in isolierten Browserkontexten. Keine Änderungen an
   Rezepten im Browserprofil des Nutzers.
 - Web-Produktionsbuild erfolgreich; optimierte Ausgabe startet ohne Laufzeitfehler und lädt einen isolierten gespeicherten Testdatensatz nach Neuladen korrekt.
+
+
+## Rezepte bearbeiten
+
+- In der Sammlung ein Rezept auswählen und im rechten Bereich „Rezept bearbeiten“
+  öffnen. Auf schmalen Ansichten steht dieser Bereich unter der Sammlung.
+- Alle Werte werden vorausgefüllt; Zutaten und Schritte lassen sich wie beim
+  Anlegen ändern, hinzufügen, entfernen und umordnen.
+- Stunden und Minuten werden aus der gespeicherten Dauer zurückgerechnet.
+  Grammangaben erscheinen mit Dezimalkomma, ohne Rundung oder wissenschaftliche
+  Schreibweise. Unverändertes Speichern erhält alle Werte und Identitäten.
+- Die Rezept-ID bleibt erhalten, auch bei einer Umbenennung. Gleichnamige Rezepte
+  werden nicht zusammengeführt. Beibehaltene Zutaten und Schritte behalten ihre IDs.
+- Die Datenbankversion bleibt 1; zuvor angelegte Rezepte funktionieren weiter.
+  Updates prüfen die vorhandene ID und ersetzen den Datensatz innerhalb einer
+  Transaktion. Eine nicht vorhandene ID erzeugt beim Bearbeiten keinen neuen Eintrag.
+- Änderungen werden erst beim erfolgreichen Speichern übernommen. Bei einem Fehler
+  bleibt der Entwurf offen, das gespeicherte Original bleibt bestehen.
+- Abbrechen und Neuladen verwerfen ungespeicherte Änderungen. Die Rezeptauswahl
+  bleibt beim Abbrechen erhalten.
+
+Die Browserprüfungen umfassen Anlegen und Bearbeiten. Einzelne Abläufe können
+im Ordner `tests/browser` mit `npm run test:create` bzw. `npm run test:edit`
+gestartet werden. Beide verwenden isolierte Testdaten.
+
+Für eine Prüfung ohne automatische Seitenneuladungen zuerst die fertige Web-Ausgabe
+bauen und anschließend im Ordner `tests/browser` ausführen:
+
+```powershell
+npm run test:production
+```
+
+Dieser Prüflauf startet selbst einen lokalen statischen Server für die bereits
+gebaute Ausgabe und beendet ihn anschließend. Ein Entwicklungsserver ist dafür
+nicht erforderlich.
+
+## Verifikation von Schritt 5 (08.09.2026)
+
+- 15 gemeinsame Tests erfolgreich, einschließlich verlustfreier Übernahme
+  bestehender Werte, sehr kleiner Grammangaben und stabiler Rezept-/Eintrags-IDs.
+- Web-Entwicklungsbuild, Android-Debug-Build und Web-Produktionsbuild erfolgreich.
+- Anlegen und Bearbeiten vollständig gegen die fertige Web-Ausgabe geprüft.
+- Bestehende Datensätze unverändert öffnen/speichern, umbenennen, Zutaten ändern,
+  hinzufügen/entfernen, Schritte umordnen und Dauern ändern; nach Neuladen kontrolliert.
+- Abbrechen verwirft Änderungen und behält die Auswahl bei. Ungültige Eingaben
+  und Speicherfehler verändern das gespeicherte Original nicht; erneutes Speichern funktioniert.
+- Gleichnamige Rezepte bleiben getrennt. Andere Rezepte bleiben unverändert.
+  Updates mit einer fehlenden ID werden abgewiesen, ohne einen neuen Datensatz anzulegen.
+- Desktop- und schmale Bearbeitungsansicht geprüft; keine Browser-Laufzeitfehler.
+  Alle Browserdaten stammten aus isolierten Testkontexten, nicht aus dem Nutzerprofil.

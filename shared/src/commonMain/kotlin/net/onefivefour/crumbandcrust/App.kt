@@ -14,6 +14,8 @@ fun App(repository: RecipeRepository = BrowserOnlyRecipeRepository) {
     var loading by remember { mutableStateOf(repository.isAvailable) }
     var loadError by remember { mutableStateOf<String?>(null) }
     var retry by remember { mutableIntStateOf(0) }
+    var recipeBeingEdited by remember { mutableStateOf<Recipe?>(null) }
+    var selectedRecipeId by remember { mutableStateOf<String?>(null) }
     var editing by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     var saveError by remember { mutableStateOf<String?>(null) }
@@ -38,18 +40,22 @@ fun App(repository: RecipeRepository = BrowserOnlyRecipeRepository) {
     BreadTheme {
         if (editing) {
             RecipeEditor(
-                saving = saving, saveError = saveError,
-                onCancel = { if (!saving) { editing = false; saveError = null } },
+                existingRecipe = recipeBeingEdited, saving = saving, saveError = saveError,
+                onCancel = { if (!saving) { editing = false; recipeBeingEdited = null; saveError = null } },
                 onSave = { recipe ->
                     if (!saving) {
                         saving = true
                         saveError = null
+                        val isUpdate = recipeBeingEdited != null
                         scope.launch {
                             try {
-                                repository.add(recipe)
-                                recipes = (recipes + recipe).sortedBy { it.name.lowercase() }
+                                if (isUpdate) repository.update(recipe) else repository.add(recipe)
+                                recipes = (if (isUpdate) recipes.map { if (it.id == recipe.id) recipe else it } else recipes + recipe)
+                                    .sortedBy { it.name.lowercase() }
+                                selectedRecipeId = recipe.id
                                 savedRecipe = recipe
                                 editing = false
+                                recipeBeingEdited = null
                             } catch (cancelled: CancellationException) {
                                 throw cancelled
                             } catch (_: Exception) {
@@ -64,7 +70,12 @@ fun App(repository: RecipeRepository = BrowserOnlyRecipeRepository) {
         } else {
             HomeScreen(
                 recipes = recipes, loading = loading, loadError = loadError, onRetry = { retry++ },
-                onAddRecipe = { savedRecipe = null; saveError = null; editing = true },
+                onAddRecipe = { savedRecipe = null; saveError = null; recipeBeingEdited = null; editing = true },
+                onEditRecipe = { recipe ->
+                    savedRecipe = null; saveError = null; selectedRecipeId = recipe.id
+                    recipeBeingEdited = recipe; editing = true
+                },
+                selectedRecipeId = selectedRecipeId, onSelectRecipe = { selectedRecipeId = it },
                 storageAvailable = repository.isAvailable, savedRecipe = savedRecipe,
             )
         }

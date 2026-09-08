@@ -81,6 +81,30 @@ data class RecipeDraft(
     }
 }
 
+fun Recipe.toDraft(): RecipeDraft = RecipeDraft(
+    id = id, name = name, description = description,
+    ingredients = ingredients.map { IngredientDraft(it.id, it.name, gramsForInput(it.grams)) },
+    steps = steps.map { StepDraft(it.id, it.title, it.instruction, (it.durationMinutes / 60).toString(), (it.durationMinutes % 60).toString()) },
+)
+
+// Expand scientific notation so even very small stored amounts remain valid editable decimals.
+internal fun gramsForInput(value: Double): String {
+    require(value.isFinite() && value > 0)
+    val raw = value.toString().lowercase()
+    val parts = raw.split('e')
+    val plain = if (parts.size == 1) raw else {
+        val mantissa = parts[0]
+        val digits = mantissa.replace(".", "")
+        val point = (mantissa.indexOf('.').takeIf { it >= 0 } ?: mantissa.length) + parts[1].toInt()
+        when {
+            point <= 0 -> "0." + "0".repeat(-point) + digits
+            point >= digits.length -> digits + "0".repeat(point - digits.length)
+            else -> digits.take(point) + "." + digits.drop(point)
+        }
+    }
+    return (if ('.' in plain) plain.trimEnd('0').trimEnd('.') else plain).replace('.', ',')
+}
+
 internal fun parseGrams(text: String): Double? {
     val normalized = text.trim().replace(',', '.')
     if (!Regex("[0-9]+(?:\\.[0-9]+)?").matches(normalized)) return null
