@@ -4,9 +4,11 @@ Brotrezepte und Backabläufe mit Compose Multiplatform für Web und Android.
 
 ## Stand
 
-Schritt 2: leeres, ausführbares Projekt. Beide Plattformen zeigen absichtlich
-nur eine weiße Compose-Fläche. Homescreen, Rezepte und Datenbank folgen nach
-separater Freigabe. Den abgestimmten Umfang beschreibt [PLAN.md](PLAN.md).
+Schritt 3: responsiver Homescreen im Stil der Designvorlage. Rezeptliste und
+Backplan zeigen Leerzustände. „Rezept hinzufügen“ zeigt vorerst einen
+schließbaren Verfügbarkeitshinweis. Das Eingabeformular und die lokale
+Datenbank folgen in Schritt 4 nach Freigabe. Den abgestimmten Umfang
+beschreibt [PLAN.md](PLAN.md).
 
 ## Voraussetzungen
 
@@ -110,3 +112,27 @@ ist enthalten; die Distribution ist mit einer SHA-256-Prüfsumme abgesichert.
 Auf diesem Rechner wurde ausschließlich dieses Repository als Git
 `safe.directory` registriert, da die initiale Sandbox sein `.git`-Verzeichnis
 unter einem anderen Windows-Benutzer angelegt hat.
+
+## Gestaltung
+
+Der Homescreen verwendet Newsreader und Plus Jakarta Sans aus den
+Designreferenzen. Die Schriftdateien liegen als gemeinsame Compose-Ressourcen
+im Projekt und werden von derselben Origin wie die App geladen, ohne externe
+Schriftanfragen. Beide stehen unter der SIL Open Font License; die Lizenztexte
+liegen in `licenses/`. Quelle: [Google Fonts](https://github.com/google/fonts).
+
+Ab 840 dp stehen Rezeptliste und Backplan nebeneinander. Darunter werden die
+Bereiche gestapelt; der Inhalt ist scrollbar, der Kopfbereich bleibt sichtbar.
+Buttons unterstützen Maus, Touch und Tastatur mit sichtbarem Fokus.
+
+## Verifikation von Schritt 3 (08.09.2026)
+
+- Web-Entwicklungsbuild und Android-Debug-Build erfolgreich.
+- Edge: Desktop 1280 × 900, Tablet 1024 × 768, schmale Ansichten
+  390 × 844 und 320 × 740 visuell geprüft.
+- Keine JavaScript-Laufzeitfehler oder fehlgeschlagenen Anfragen im Browserlauf.
+- Hinweisanzeige und Schließen per Maus, Aktivierung per Tab/Enter und
+  Tablet-Touch geprüft. Sichtbaren Tastaturfokus kontrolliert.
+- Gestapeltes Layout, Scrollbarkeit bis zum Seitenende und fester Kopfbereich
+  auf schmaler Ansicht geprüft.
+- Noch keine Rezeptdaten, Datenbank oder Eingabeformulare implementiert.
