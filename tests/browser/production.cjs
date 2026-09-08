@@ -33,5 +33,6 @@ function run(script, url) {
         await run('editing.cjs', url);
         await run('details.cjs', url);
         await run('scheduling.cjs', url);
+        await run('time-controls.cjs', url);
     } finally { server.close(); }
 })().catch(error => { console.error(error); server.close(); process.exitCode = 1; });

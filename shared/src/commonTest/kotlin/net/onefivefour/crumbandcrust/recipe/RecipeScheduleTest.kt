@@ -86,4 +86,25 @@ class RecipeScheduleTest {
         assertFailsWith<IllegalArgumentException> { recipe.schedule(anchor("31.12.9999", "23:59"), PlanAnchor.START, zone) }
         assertFailsWith<IllegalArgumentException> { recipe.schedule(anchor("01.01.0001", "00:00"), PlanAnchor.FINISH, zone) }
     }
+
+    @Test fun dayControlsCrossLeapDaysAndYearBoundaries() {
+        assertEquals(LocalDate(2028, 2, 29), shiftPlanDate(LocalDate(2028, 3, 1), -1))
+        assertEquals(LocalDate(2027, 1, 1), shiftPlanDate(LocalDate(2026, 12, 31), 1))
+        assertNull(shiftPlanDate(LocalDate(1, 1, 1), -1))
+        assertNull(shiftPlanDate(LocalDate(9999, 12, 31), 1))
+    }
+
+    @Test fun hourControlsKeepMinutesAndAdjustDate() {
+        assertEquals(LocalDateTime(2027, 1, 1, 0, 45), shiftPlanHour(LocalDate(2026, 12, 31), LocalTime(23, 45), 1))
+        assertEquals(LocalDateTime(2028, 2, 29, 23, 15), shiftPlanHour(LocalDate(2028, 3, 1), LocalTime(0, 15), -1))
+        assertEquals(LocalDateTime(2026, 9, 8, 13, 30), shiftPlanHour(LocalDate(2026, 9, 8), LocalTime(12, 30), 1))
+        assertNull(shiftPlanHour(LocalDate(1, 1, 1), LocalTime(0, 30), -1))
+        assertNull(shiftPlanHour(LocalDate(9999, 12, 31), LocalTime(23, 30), 1))
+    }
+
+    @Test fun hourControlsEditWallClockWhileCalculationRejectsSpringGap() {
+        val local = checkNotNull(shiftPlanHour(LocalDate(2026, 3, 29), LocalTime(1, 30), 1))
+        assertEquals(LocalTime(2, 30), local.time)
+        assertFailsWith<IllegalArgumentException> { resolvePlanAnchor(local.date, local.time, zone) }
+    }
 }

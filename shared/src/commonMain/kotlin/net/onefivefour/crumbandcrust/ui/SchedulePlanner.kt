@@ -20,7 +20,17 @@ internal fun SchedulePlanner(recipe: Recipe, plan: RecipeSchedule?, onPlan: (Rec
     var error by remember(recipe) { mutableStateOf<String?>(null) }
     val date = parsePlanDate(dateText)
     val time = parsePlanTime(timeText)
+    val previousDay = date?.let { shiftPlanDate(it, -1) }
+    val nextDay = date?.let { shiftPlanDate(it, 1) }
+    val previousHour = if (date != null && time != null) shiftPlanHour(date, time, -1) else null
+    val nextHour = if (date != null && time != null) shiftPlanHour(date, time, 1) else null
     fun invalidate() { onPlan(null); error = null; attempted = false }
+
+    fun setMoment(moment: LocalDateTime) {
+        dateText = formatPlanDate(moment.date)
+        timeText = formatPlanTime(moment.time)
+        invalidate()
+    }
 
     Heading("Wann möchtest du backen?")
     Spacer(Modifier.height(8.dp))
@@ -31,11 +41,23 @@ internal fun SchedulePlanner(recipe: Recipe, plan: RecipeSchedule?, onPlan: (Rec
         BreadButton("Zielzeit", { mode = PlanAnchor.FINISH; invalidate() }, Modifier.weight(1f).semantics { selected = mode == PlanAnchor.FINISH }, secondary = mode != PlanAnchor.FINISH)
     }
     Spacer(Modifier.height(12.dp))
+    BreadButton("Jetzt", { setMoment(Clock.System.now().toLocalDateTime(zone)) }, Modifier.fillMaxWidth(), secondary = true)
+    Spacer(Modifier.height(12.dp))
     RecipeField("Datum (TT.MM.JJJJ)", dateText, { dateText = it; invalidate() },
         if (attempted && date == null) "Gib ein gültiges Datum ein, z. B. 09.09.2026." else null, true)
     Spacer(Modifier.height(12.dp))
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        BreadButton("−1 Tag", { previousDay?.let { dateText = formatPlanDate(it); invalidate() } }, Modifier.weight(1f), secondary = true, enabled = previousDay != null)
+        BreadButton("+1 Tag", { nextDay?.let { dateText = formatPlanDate(it); invalidate() } }, Modifier.weight(1f), secondary = true, enabled = nextDay != null)
+    }
+    Spacer(Modifier.height(12.dp))
     RecipeField("Uhrzeit (HH:MM)", timeText, { timeText = it; invalidate() },
         if (attempted && time == null) "Gib eine Uhrzeit von 00:00 bis 23:59 ein." else null, true)
+    Spacer(Modifier.height(12.dp))
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        BreadButton("−1 Stunde", { previousHour?.let { setMoment(it) } }, Modifier.weight(1f), secondary = true, enabled = previousHour != null)
+        BreadButton("+1 Stunde", { nextHour?.let { setMoment(it) } }, Modifier.weight(1f), secondary = true, enabled = nextHour != null)
+    }
     Spacer(Modifier.height(12.dp))
     BreadButton("Planung berechnen", {
         attempted = true

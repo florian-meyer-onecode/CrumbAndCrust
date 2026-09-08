@@ -348,3 +348,23 @@ nicht erforderlich.
   Entfernen der Planung, Rezeptwechsel und Neuladen im Browser geprüft.
 - Desktop- und schmale Zeitplanansicht visuell kontrolliert. Keine
   Browser-Laufzeitfehler; alle Testdaten in isolierten Browserkontexten.
+
+## Schnellwahl für Datum und Uhrzeit
+
+- „Jetzt“ befüllt beide Felder bei jedem Klick mit dem aktuellen lokalen Datum
+  und der aktuellen Uhrzeit; der gewählte Start-/Zielmodus bleibt erhalten.
+- „−1 Tag“ / „+1 Tag“ wechseln den Kalendertag und behalten die Uhrzeit bei.
+- „−1 Stunde“ / „+1 Stunde“ ändern die angezeigte Stunde, behalten die Minuten
+  bei und passen beim Überschreiten von Mitternacht das Datum an.
+- Die Buttons bearbeiten lokale Kalenderwerte. Eine durch die Zeitumstellung
+  nicht existierende Uhrzeit wird weiterhin beim Berechnen der Planung markiert.
+- Bei ungültigen benötigten Feldern oder an den Datumsgrenzen sind die jeweiligen
+  Plus-/Minus-Buttons deaktiviert. „Jetzt“ kann auch ungültige Felder ersetzen.
+- Jede Schnellwahl entfernt eine bestehende Berechnung; „Planung berechnen“
+  übernimmt anschließend die neuen Werte. Rezeptdaten bleiben unverändert.
+- `npm run test:time-controls` prüft die Schnellwahl auch auf schmalen Ansichten.
+
+Prüfung der Schnellwahl: 32 gemeinsame Tests, Web-Entwicklungsbuild und
+Android-Debug-Build erfolgreich. Browserprüfung für Tages-/Stundenwechsel,
+Schaltjahr, Jetzt in beiden Planungsmodi, ungültige Felder und Rücksetzen alter
+Planungen erfolgreich. Schmale Ansicht visuell geprüft; Rezeptdaten unverändert.

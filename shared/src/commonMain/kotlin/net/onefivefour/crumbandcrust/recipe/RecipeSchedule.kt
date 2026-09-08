@@ -52,3 +52,20 @@ fun formatPlannedMoment(instant: Instant, zone: TimeZone): String {
     return "${formatPlanDate(local.date)} · ${formatPlanTime(local.time)}"
 }
 fun formatPlanOffset(instant: Instant, zone: TimeZone): String = "UTC${zone.offsetAt(instant).toString().let { if (it == "Z") "+00:00" else it }}"
+
+// These controls edit local calendar fields; schedule calculation still validates DST gaps.
+fun shiftPlanDate(date: LocalDate, days: Int): LocalDate? {
+    require(days == -1 || days == 1)
+    return date.plus(days, DateTimeUnit.DAY).takeIf { it.year in 1..9999 }
+}
+
+fun shiftPlanHour(date: LocalDate, time: LocalTime, hours: Int): LocalDateTime? {
+    require(hours == -1 || hours == 1)
+    val hour = time.hour + hours
+    val shiftedDate = when {
+        hour < 0 -> shiftPlanDate(date, -1)
+        hour > 23 -> shiftPlanDate(date, 1)
+        else -> date
+    } ?: return null
+    return LocalDateTime(shiftedDate, LocalTime((hour + 24) % 24, time.minute))
+}
