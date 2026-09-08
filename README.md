@@ -4,11 +4,13 @@ Brotrezepte und Backabläufe mit Compose Multiplatform für Web und Android.
 
 ## Stand
 
-Schritt 3: responsiver Homescreen im Stil der Designvorlage. Rezeptliste und
-Backplan zeigen Leerzustände. „Rezept hinzufügen“ zeigt vorerst einen
-schließbaren Verfügbarkeitshinweis. Das Eingabeformular und die lokale
-Datenbank folgen in Schritt 4 nach Freigabe. Den abgestimmten Umfang
-beschreibt [PLAN.md](PLAN.md).
+Schritt 4: Rezepte im Browser anlegen und lokal in IndexedDB speichern.
+Das Formular erfasst Name, optionale Kurzbeschreibung, Zutaten in Gramm sowie
+geordnete Schritte mit optionaler Anleitung und Dauer in Stunden/Minuten.
+Zutaten und Schritte lassen sich hinzufügen oder entfernen; Schritte können
+verschoben werden. Gespeicherte Rezepte erscheinen in der Sammlung und bleiben
+nach Neuladen erhalten. Bearbeiten und die vollständige Ablaufanzeige folgen
+in den nächsten Freigabeschritten. Siehe [PLAN.md](PLAN.md).
 
 ## Voraussetzungen
 
@@ -85,9 +87,19 @@ Android verwendet das separate App-Modul und das Android-KMP-Library-Plugin
 im gemeinsamen Modul, ohne veraltete Kombination von KMP und Android-App-Plugin.
 Siehe [JetBrains-Projektstruktur](https://kotlinlang.org/docs/multiplatform/multiplatform-project-agp-9-migration.html).
 
-Lokale Datenhaltung wird in Schritt 4 mit IndexedDB ergänzt. Browserdaten
-werden dann pro Browserprofil und Origin gespeichert; sie werden nicht mit
-Android synchronisiert.
+Rezepte liegen in der IndexedDB-Datenbank `crumb-and-crust` (Version 1),
+Object Store `recipes`, mit einer unabhängigen UUID pro Rezept. Schreiben wird
+erst nach dem erfolgreichen Transaktionsabschluss bestätigt. Fehler überschreiben
+keine vorhandenen Rezepte; ein ungespeicherter Entwurf bleibt bei Speicherfehlern
+offen. Zutaten und Schritte haben ebenfalls stabile IDs, unabhängig von ihrer
+Position. Die gespeicherten Objekte tragen eine eigene Schema-Version.
+
+Browserdaten sind an Browserprofil und Origin gebunden. Verwende für die lokale
+Entwicklung weiterhin `http://localhost:8080`: Ein anderer Hostname oder Port
+hat einen eigenen Speicher. Löschen der Websitedaten entfernt die Rezepte.
+Es gibt keine Synchronisierung oder Sicherung auf einem Server. Android zeigt
+vorerst einen Hinweis und deaktiviert die Eingabe, statt flüchtige Daten als
+gespeichert auszugeben. Die Android-Speicheranbindung bleibt ein späterer Schritt.
 
 ## Git und Arbeitsweise
 
@@ -136,3 +148,66 @@ Buttons unterstützen Maus, Touch und Tastatur mit sichtbarem Fokus.
 - Gestapeltes Layout, Scrollbarkeit bis zum Seitenende und fester Kopfbereich
   auf schmaler Ansicht geprüft.
 - Noch keine Rezeptdaten, Datenbank oder Eingabeformulare implementiert.
+
+
+## Rezepteingabe
+
+- Pflicht: Rezeptname, mindestens eine benannte Zutat mit positiver Grammmenge
+  und mindestens ein benannter Schritt mit gültiger Dauer.
+- Mengen akzeptieren Komma oder Punkt als Dezimalzeichen, ohne Tausendertrennzeichen.
+  Die zulässige Menge liegt über 0 bis einschließlich 1.000.000 g pro Zutat.
+- Dauer: ganze Stunden von 0 bis 8760 und Minuten von 0 bis 59; ein abschließender
+  Meilenstein darf die Dauer 0 haben. Abkühlen explizit als Schritt erfassen.
+- Bis zu 100 Zutaten bzw. Schritte. Name: 120 Zeichen, Zutatenname: 100,
+  Kurzbeschreibung: 1.000, Anleitung pro Schritt: 5.000 Zeichen.
+- Abbrechen verwirft den Entwurf. Vor dem Speichern werden keine Rezeptdaten
+  geschrieben. Neuladen verwirft ebenfalls einen noch ungespeicherten Entwurf.
+- Gleichnamige Rezepte sind erlaubt und werden als getrennte Einträge gespeichert.
+
+## Tests ausführen
+
+Gemeinsame fachliche Tests (das JVM-Ziel ist nur für Tests vorgesehen):
+
+```powershell
+.\gradlew.bat :shared:jvmTest
+```
+
+Wiederholbare Browserprüfung bei laufender Web-App; hierfür zusätzlich Node.js
+mit npm installieren. Die App selbst benötigt weiterhin keine globale
+Node.js-Installation.
+
+```powershell
+cd tests/browser
+npm ci
+npx playwright install chromium
+npm test
+```
+
+Optional mit installiertem Edge statt heruntergeladenem Chromium in PowerShell:
+
+```powershell
+$env:BROWSER_CHANNEL = "msedge"
+npm test
+```
+
+`APP_URL` kann die Adresse überschreiben. Die Prüfung nutzt isolierte
+Browserkontexte und verändert keine Rezepte im persönlichen Browserprofil.
+Screenshots landen unter `build/browser-tests/`.
+
+## Verifikation von Schritt 4 (08.09.2026)
+
+- Zehn gemeinsame Tests für Eingabeprüfung, Dezimalkomma, Dauergrenzen,
+  stabile Identitäten, Umordnen und JSON-Datenkonvertierung erfolgreich.
+- Web-Entwicklungsbuild und Android-Debug-Build erfolgreich.
+- Browser: mehrere Zutaten und Schritte anlegen, entfernen, umordnen,
+  speichern und nach Neuladen mit vollständigen Daten wieder laden.
+- Abbrechen erzeugt keinen Datenbankeintrag. Gleiche Rezeptnamen bleiben
+  getrennte Datensätze; doppelte IDs können keinen Datensatz überschreiben.
+- Schreibfehler behalten den Entwurf; erneutes Speichern funktioniert.
+  Während einer laufenden Speicherung sind erneutes Speichern und Abbrechen
+  gesperrt. Lesefehler lassen vorhandene Daten unberührt; erneutes Laden funktioniert.
+- Desktop- und schmale Formulare visuell geprüft; Eingabe und Speicherung
+  auch in einem Browserkontext mit Touch-Unterstützung geprüft.
+- Testdaten bleiben in isolierten Browserkontexten. Keine Änderungen an
+  Rezepten im Browserprofil des Nutzers.
+- Web-Produktionsbuild erfolgreich; optimierte Ausgabe startet ohne Laufzeitfehler und lädt einen isolierten gespeicherten Testdatensatz nach Neuladen korrekt.

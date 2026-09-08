@@ -23,6 +23,7 @@ kotlin {
     }
     sourceSets {
         wasmJsMain.dependencies {
+            implementation(libs.kotlinx.coroutines)
             implementation(project(":shared"))
             implementation(libs.compose.ui)
         }

@@ -1,0 +1,6 @@
+{
+  "name": "crumb-and-crust-browser-checks",
+  "private": true,
+  "scripts": { "test": "node recipes.cjs" },
+  "devDependencies": { "playwright": "1.62.1" }
+}
