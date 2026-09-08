@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Crumb &amp; Crust — Bread &amp; Timing</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#FFF8F5",
+            "surface": "#FFF8F5",
+            "surface-container-low": "#FFF1E8",
+            "surface-container": "#FEEADC",
+            "surface-container-high": "#F8E5D6",
+            "surface-container-highest": "#F2DFD1",
+            "surface-container-lowest": "#FFFFFF",
+            "primary": "#90490B",
+            "primary-container": "#AE6024",
+            "secondary": "#536345",
+            "secondary-container": "#D6E9C2",
+            "tertiary": "#815215",
+            "outline": "#877367",
+            "outline-variant": "#DAC2B4",
+            "on-surface": "#231A11",
+            "on-surface-variant": "#544339"
+          },
+          fontFamily: {
+            "headline": ["Newsreader", "serif"],
+            "body": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background font-body text-on-surface min-h-screen flex flex-col antialiased selection:bg-surface-container-highest selection:text-primary">
+<!-- Minimal Calm Header -->
+<header class="border-b border-outline-variant/30 bg-surface/80 backdrop-blur sticky top-0 z-40">
+<div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-surface-container">
+<img alt="Crumb &amp; Crust Logo" class="w-7 h-7 object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XRXJqxvesKbnn8W0kqZauj2U0rpVonPBggXb4At_J0wq7EeG4FNchlL7kiC81fIeVSl0nAHIN_CwGsNVPnCKhQBLfAfsKzLbKWD6Ov5-bdaqSTMGRbwVTCGTX753r8IAY1-i8tf1KBsDzDa-ybVTzskTy8x7fkYmBjRVRmAj-zSmw6mHwd1JYKhBmjre6M9TKSRLBnUU4cMCQCKUM3_01_Ge2UAl_SsjS_-BkgiygFriixsHtuQQRpXLHb"/>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline text-2xl font-medium tracking-tight text-on-surface">Crumb &amp; Crust</span>
+<span class="text-xs tracking-wider uppercase text-outline font-semibold hidden sm:inline">Baker's Schedule</span>
+</div>
+</div>
+<div class="text-xs text-outline flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary inline-block"></span>
+<span>Simple Mode</span>
+</div>
+</div>
+</header>
+<!-- Main Focus Container -->
+<main class="max-w-5xl mx-auto px-6 py-8 flex-1 w-full">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- LEFT COLUMN: Recipe Switcher + Scaled Ingredients (5 cols) -->
+<aside class="lg:col-span-5 flex flex-col gap-6">
+<!-- Recipe Selector Cards -->
+<div>
+<h2 class="text-xs font-semibold uppercase tracking-wider text-outline mb-3">Select Recipe</h2>
+<div class="flex flex-col gap-2" id="recipe-list">
+<!-- Recipe 1 (Active) -->
+<button class="recipe-btn w-full text-left p-3.5 rounded-xl border border-primary/30 bg-surface-container-lowest shadow-sm flex items-center justify-between transition-all" id="rec-btn-country" onclick="switchRecipe('country')" type="button">
+<div>
+<p class="font-headline text-lg font-medium text-on-surface leading-snug">Country Sourdough Boule</p>
+<p class="text-xs text-on-surface-variant mt-0.5">80% Bread / 20% Whole Wheat • 75% Hydration</p>
+</div>
+<span class="text-xs font-medium px-2 py-1 rounded-full bg-surface-container-high text-primary font-mono shrink-0 ml-2">~35 hrs</span>
+</button>
+<!-- Recipe 2 -->
+<button class="recipe-btn w-full text-left p-3.5 rounded-xl border border-outline-variant/30 hover:border-outline-variant bg-surface-container-lowest/70 hover:bg-surface-container-lowest transition-all flex items-center justify-between" id="rec-btn-baguettes" onclick="switchRecipe('baguettes')" type="button">
+<div>
+<p class="font-headline text-lg font-medium text-on-surface leading-snug">Rustic Baguettes</p>
+<p class="text-xs text-on-surface-variant mt-0.5">Traditional Poolish pre-ferment • 70% Hydration</p>
+</div>
+<span class="text-xs font-medium px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant font-mono shrink-0 ml-2">~18 hrs</span>
+</button>
+<!-- Recipe 3 -->
+<button class="recipe-btn w-full text-left p-3.5 rounded-xl border border-outline-variant/30 hover:border-outline-variant bg-surface-container-lowest/70 hover:bg-surface-container-lowest transition-all flex items-center justify-between" id="rec-btn-focaccia" onclick="switchRecipe('focaccia')" type="button">
+<div>
+<p class="font-headline text-lg font-medium text-on-surface leading-snug">Same-Day Rosemary Focaccia</p>
+<p class="text-xs text-on-surface-variant mt-0.5">Extra Virgin Olive Oil • 82% Hydration</p>
+</div>
+<span class="text-xs font-medium px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant font-mono shrink-0 ml-2">~6 hrs</span>
+</button>
+</div>
+</div>
+<!-- Scaler & Formula Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h3 class="font-headline text-xl text-on-surface font-medium">Batch Scaler</h3>
+<p class="text-xs text-outline">Proportional baker's percentage</p>
+</div>
+<!-- Quick Loaf Stepper -->
+<div class="inline-flex items-center gap-1 bg-surface-container-low p-1 rounded-lg border border-outline-variant/20">
+<button class="px-2.5 py-1 text-xs rounded font-semibold bg-surface-container-lowest text-primary shadow-xs" id="btn-loaf-1" onclick="setLoafCount(1)" type="button">1 Loaf</button>
+<button class="px-2.5 py-1 text-xs rounded font-semibold text-on-surface-variant hover:text-on-surface" id="btn-loaf-2" onclick="setLoafCount(2)" type="button">2 Loaves</button>
+</div>
+</div>
+<!-- Direct Gram Adjuster -->
+<div class="flex items-center justify-between bg-surface-container-low/60 rounded-xl px-3.5 py-2 mb-4 border border-outline-variant/20">
+<span class="text-xs font-medium text-on-surface-variant">Target Raw Weight</span>
+<div class="flex items-center gap-2">
+<button class="w-6 h-6 rounded bg-surface-container-lowest hover:bg-surface-container text-on-surface flex items-center justify-center font-bold text-sm border border-outline-variant/30" onclick="adjustWeight(-50)" type="button">−</button>
+<span class="font-mono text-sm font-bold text-primary w-14 text-center" id="display-target-weight">900g</span>
+<button class="w-6 h-6 rounded bg-surface-container-lowest hover:bg-surface-container text-on-surface flex items-center justify-center font-bold text-sm border border-outline-variant/30" onclick="adjustWeight(50)" type="button">+</button>
+</div>
+</div>
+<!-- Clean Formula Breakdown Table -->
+<div class="space-y-2.5 text-sm" id="ingredients-container">
+<!-- Dynamically populated -->
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex justify-between items-center text-xs text-outline">
+<span>Flour Base: <strong class="font-mono text-on-surface font-semibold" id="base-flour-label">457g</strong></span>
+<span>Total: <strong class="font-mono text-on-surface font-semibold" id="total-sum-label">900g</strong></span>
+</div>
+</div>
+</aside>
+<!-- RIGHT COLUMN: Elegant Vertical Time Management Spine (7 cols) -->
+<section class="lg:col-span-7 bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm">
+<!-- Timeline Header with Start Time Picker -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 mb-6 border-b border-outline-variant/30">
+<div>
+<h2 class="font-headline text-2xl text-on-surface font-medium" id="timeline-recipe-title">Country Sourdough Boule</h2>
+<p class="text-xs text-outline mt-0.5">Calculated timeline based on fermentation steps</p>
+</div>
+<div class="flex items-center gap-2 self-start sm:self-auto bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-base text-primary">schedule</span>
+<span class="text-xs font-semibold text-on-surface">Start:</span>
+<input class="bg-surface-container-lowest border-0 rounded px-2 py-0.5 text-xs font-mono font-bold text-primary focus:ring-1 focus:ring-primary shadow-xs" id="timeline-start-time" onchange="updateSchedule()" type="time" value="07:00"/>
+</div>
+</div>
+<!-- Vertical Timeline Spine -->
+<div class="relative pl-6 sm:pl-8 space-y-0" id="timeline-steps">
+<!-- Populated via JS for selected recipe -->
+</div>
+<!-- Timeline Footer Tip -->
+<div class="mt-6 pt-4 border-t border-outline-variant/20 flex items-center justify-between text-xs text-outline">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-secondary">check_circle</span>
+<span>Allows 2h minimum cooling before slicing</span>
+</div>
+<button class="text-primary hover:underline flex items-center gap-1 font-medium" onclick="window.print()">
+<span class="material-symbols-outlined text-sm">print</span> Print Schedule
+          </button>
+</div>
+</section>
+</div>
+</main>
+<script>
+    // Minimal recipe database
+    const RECIPES = {
+      country: {
+        name: "Country Sourdough Boule",
+        baseWeight: 900,
+        ingredients: [
+          { name: "Flour (80% Bread, 20% Whole Wheat)", pct: 100 },
+          { name: "Water", pct: 75 },
+          { name: "Active Starter (100% hyd.)", pct: 20 },
+          { name: "Fine Sea Salt", pct: 2 }
+        ],
+        steps: [
+          { title: "Main Dough Mixing", desc: "Autolyse 30m, incorporate active starter & salt until cohesive.", durationAfterMinutes: 30 },
+          { title: "Stretch & Fold Sets", desc: "3 sets gentle coil folds every 30 mins; check gluten windowpane.", durationAfterMinutes: 600 },
+          { title: "Forming & Fridge Retard", desc: "Preshape, 20m bench rest, final stitch into banneton. Chilled at 3°C.", durationAfterMinutes: 1440 },
+          { title: "Bake Covered at 250°C", desc: "Turn out onto parchment, clean score. Bake trapped with lid & steam.", durationAfterMinutes: 30 },
+          { title: "Uncover & Lower to 210°C", desc: "Remove lid to vent moisture, bake until deep mahogany blistered ear.", durationAfterMinutes: 15 },
+          { title: "Finished & Cooling", desc: "Listen for crackling crust. Rest fully on wire rack before cutting.", durationAfterMinutes: 0 }
+        ]
+      },
+      baguettes: {
+        name: "Rustic Baguettes",
+        baseWeight: 700,
+        ingredients: [
+          { name: "French T65 or Bread Flour", pct: 100 },
+          { name: "Cold Water", pct: 70 },
+          { name: "Poolish (Pre-ferment)", pct: 30 },
+          { name: "Instant Yeast", pct: 0.4 },
+          { name: "Fine Sea Salt", pct: 2 }
+        ],
+        steps: [
+          { title: "Poolish Ferment", desc: "Combine equal flour and water with pinch of yeast. Rest at room temp.", durationAfterMinutes: 720 },
+          { title: "Final Dough Mix & Autolyse", desc: "Mix dough until shaggy, rest 25 mins, fold in salt and remaining water.", durationAfterMinutes: 90 },
+          { title: "Divide & Pre-shape Cylinders", desc: "Divide gently into three 230g portions, loose cylinder roll.", durationAfterMinutes: 20 },
+          { title: "Final Shaping into Couche", desc: "Taper ends, tuck seam tightly, proof in floured linen cloth.", durationAfterMinutes: 45 },
+          { title: "Bake at 240°C with Heavy Steam", desc: "Score 3 longitudinal slashes, slide onto baking stone with hot steam.", durationAfterMinutes: 24 },
+          { title: "Cool on Wire Rack", desc: "Crisp shattering crust with open, airy honeycomb interior.", durationAfterMinutes: 0 }
+        ]
+      },
+      focaccia: {
+        name: "Same-Day Rosemary Focaccia",
+        baseWeight: 800,
+        ingredients: [
+          { name: "High-Protein Bread Flour", pct: 100 },
+          { name: "Warm Water", pct: 82 },
+          { name: "Extra Virgin Olive Oil", pct: 6 },
+          { name: "Active Dry Yeast", pct: 1.5 },
+          { name: "Fine Sea Salt", pct: 2.5 }
+        ],
+        steps: [
+          { title: "Wet Dough Shaggy Mix", desc: "Stir together flour, water, yeast, salt and 2 tbsp olive oil until hydrated.", durationAfterMinutes: 30 },
+          { title: "Bowl Folds (4 sets)", desc: "Wet hands, lift and fold dough over itself every 20 mins to build structure.", durationAfterMinutes: 80 },
+          { title: "Pan Proof in Generous Oil", desc: "Pour into oiled 9x13 pan, stretch gently toward corners. Let puff up.", durationAfterMinutes: 120 },
+          { title: "Dimple & Herb Topping", desc: "Pour EVOO on top, dimple deeply with fingertips, add fresh rosemary & flaky salt.", durationAfterMinutes: 15 },
+          { title: "Bake at 220°C until Golden", desc: "Bake until base is fried crispy and top is fragrant with golden blisters.", durationAfterMinutes: 25 },
+          { title: "Finished & Ready to Slice", desc: "Cool in pan for 10 mins, then transfer to board for cutting.", durationAfterMinutes: 0 }
+        ]
+      }
+    };
+
+    let activeRecipeKey = 'country';
+    let currentTotalWeight = 900;
+
+    function switchRecipe(key) {
+      activeRecipeKey = key;
+      const rec = RECIPES[key];
+      currentTotalWeight = rec.baseWeight;
+
+      // Update active button state
+      document.querySelectorAll('.recipe-btn').forEach(btn => {
+        btn.classList.remove('border-primary/30', 'bg-surface-container-lowest', 'shadow-sm');
+        btn.classList.add('border-outline-variant/30', 'bg-surface-container-lowest/70');
+      });
+      const activeBtn = document.getElementById(`rec-btn-${key}`);
+      if (activeBtn) {
+        activeBtn.classList.add('border-primary/30', 'bg-surface-container-lowest', 'shadow-sm');
+        activeBtn.classList.remove('border-outline-variant/30', 'bg-surface-container-lowest/70');
+      }
+
+      document.getElementById('timeline-recipe-title').textContent = rec.name;
+      renderIngredients();
+      updateSchedule();
+    }
+
+    function setLoafCount(count) {
+      document.getElementById('btn-loaf-1').className = count === 1 
+        ? "px-2.5 py-1 text-xs rounded font-semibold bg-surface-container-lowest text-primary shadow-xs"
+        : "px-2.5 py-1 text-xs rounded font-semibold text-on-surface-variant hover:text-on-surface";
+      document.getElementById('btn-loaf-2').className = count === 2 
+        ? "px-2.5 py-1 text-xs rounded font-semibold bg-surface-container-lowest text-primary shadow-xs"
+        : "px-2.5 py-1 text-xs rounded font-semibold text-on-surface-variant hover:text-on-surface";
+
+      currentTotalWeight = RECIPES[activeRecipeKey].baseWeight * count;
+      renderIngredients();
+    }
+
+    function adjustWeight(delta) {
+      currentTotalWeight = Math.max(200, currentTotalWeight + delta);
+      renderIngredients();
+    }
+
+    function renderIngredients() {
+      const rec = RECIPES[activeRecipeKey];
+      document.getElementById('display-target-weight').textContent = currentTotalWeight + 'g';
+      
+      const sumPct = rec.ingredients.reduce((acc, curr) => acc + curr.pct, 0);
+      const flourBase = Math.round((currentTotalWeight / sumPct) * 100);
+
+      const container = document.getElementById('ingredients-container');
+      container.innerHTML = '';
+
+      let calculatedSum = 0;
+
+      rec.ingredients.forEach(ing => {
+        const wt = Math.round((flourBase * ing.pct) / 100);
+        calculatedSum += wt;
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between py-1 border-b border-outline-variant/10 last:border-0";
+        row.innerHTML = `
+          <div class="flex items-baseline gap-2">
+            <span class="font-medium text-on-surface">${ing.name}</span>
+            <span class="text-xs text-outline font-mono">${ing.pct}%</span>
+          </div>
+          <span class="font-mono font-bold text-on-surface">${wt}g</span>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById('base-flour-label').textContent = flourBase + 'g';
+      document.getElementById('total-sum-label').textContent = calculatedSum + 'g';
+    }
+
+    function formatTimeAMPM(dateObj, baseDate) {
+      let hours = dateObj.getHours();
+      const mins = dateObj.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const minsStr = mins < 10 ? '0' + mins : mins;
+      
+      const dayDiff = Math.floor((dateObj.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+      let dayBadge = '';
+      if (dayDiff > 0) {
+        dayBadge = ` <span class="text-[11px] font-semibold text-primary font-mono bg-primary/10 px-1.5 py-0.5 rounded">+${dayDiff}d</span>`;
+      }
+      return `${hours}:${minsStr} ${ampm}${dayBadge}`;
+    }
+
+    function formatDuration(mins) {
+      if (mins < 60) return `${mins} mins`;
+      const hrs = Math.floor(mins / 60);
+      const rem = mins % 60;
+      return rem === 0 ? `${hrs} hrs` : `${hrs}h ${rem}m`;
+    }
+
+    function updateSchedule() {
+      const rec = RECIPES[activeRecipeKey];
+      const timeVal = document.getElementById('timeline-start-time').value || "07:00";
+      const [startH, startM] = timeVal.split(':').map(Number);
+
+      const baseDate = new Date(2025, 0, 1, startH, startM, 0);
+      let runningDate = new Date(baseDate);
+
+      const container = document.getElementById('timeline-steps');
+      container.innerHTML = `
+        <div class="absolute left-[11px] sm:left-[15px] top-3 bottom-5 w-[2px] bg-outline-variant/40"></div>
+      `;
+
+      rec.steps.forEach((step, idx) => {
+        const isLast = idx === rec.steps.length - 1;
+        const formattedTime = formatTimeAMPM(runningDate, baseDate);
+        
+        const stepEl = document.createElement('div');
+        stepEl.className = "relative flex flex-col pt-0.5 pb-6 last:pb-2";
+        
+        stepEl.innerHTML = `
+          <!-- Node Marker -->
+          <div class="absolute -left-6 sm:-left-8 top-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full ${isLast ? 'bg-secondary text-white' : 'bg-surface-container-high border border-primary/40 text-primary'} flex items-center justify-center text-xs font-mono font-bold shadow-xs">
+            ${isLast ? '<span class="material-symbols-outlined text-sm">done</span>' : (idx + 1)}
+          </div>
+
+          <!-- Step Content -->
+          <div class="pl-3 sm:pl-4">
+            <div class="flex flex-wrap items-baseline justify-between gap-1 mb-1">
+              <h4 class="font-headline text-lg font-medium text-on-surface">${step.title}</h4>
+              <span class="text-xs font-mono font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">${formattedTime}</span>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">${step.desc}</p>
+            
+            ${!isLast && step.durationAfterMinutes > 0 ? `
+              <!-- Rest duration badge -->
+              <div class="inline-flex items-center gap-1.5 mt-2.5 py-0.5 px-2.5 rounded-full bg-surface-container-low border border-outline-variant/30 text-outline text-[11px]">
+                <span class="material-symbols-outlined text-[13px] text-primary">arrow_downward</span>
+                <span>Rest &bull; <strong class="text-on-surface font-mono">${formatDuration(step.durationAfterMinutes)}</strong></span>
+              </div>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(stepEl);
+
+        // Advance time
+        runningDate = new Date(runningDate.getTime() + step.durationAfterMinutes * 60000);
+      });
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderIngredients();
+      updateSchedule();
+    });
+  </script>
+</body></html>
