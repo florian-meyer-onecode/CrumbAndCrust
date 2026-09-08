@@ -161,7 +161,7 @@ private fun EditorSection(number: String, title: String, content: @Composable Co
 }
 
 @Composable
-private fun RecipeField(
+internal fun RecipeField(
     label: String, value: String, onValueChange: (String) -> Unit, errorMessage: String?, enabled: Boolean,
     modifier: Modifier = Modifier, multiline: Boolean = false, keyboardType: KeyboardType = KeyboardType.Text,
     placeholder: String = "", accessibilityLabel: String = label,

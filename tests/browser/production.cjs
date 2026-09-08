@@ -31,5 +31,6 @@ function run(script, url) {
         const url = `http://127.0.0.1:${server.address().port}`;
         await run('recipes.cjs', url);
         await run('editing.cjs', url);
+        await run('details.cjs', url);
     } finally { server.close(); }
 })().catch(error => { console.error(error); server.close(); process.exitCode = 1; });

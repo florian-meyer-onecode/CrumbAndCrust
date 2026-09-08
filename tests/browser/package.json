@@ -2,9 +2,10 @@
   "name": "crumb-and-crust-browser-checks",
   "private": true,
   "scripts": {
-    "test": "node recipes.cjs && node editing.cjs",
+    "test": "node recipes.cjs && node editing.cjs && node details.cjs",
     "test:create": "node recipes.cjs",
     "test:edit": "node editing.cjs",
+    "test:details": "node details.cjs",
     "test:production": "node production.cjs"
   },
   "devDependencies": {

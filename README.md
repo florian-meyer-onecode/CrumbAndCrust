@@ -4,12 +4,12 @@ Brotrezepte und Backabläufe mit Compose Multiplatform für Web und Android.
 
 ## Stand
 
-Schritt 5: Rezepte im Browser anlegen und bearbeiten, lokal in IndexedDB.
-Wähle ein Rezept aus der Sammlung und klicke auf „Rezept bearbeiten“. Dasselbe
-Formular übernimmt Name, Kurzbeschreibung, Zutaten, Arbeitsschritte und Dauern.
-„Änderungen speichern“ aktualisiert das bestehende Rezept unter derselben ID;
-Abbrechen verwirft den Entwurf. Die vollständige Ablaufanzeige folgt im nächsten
-Freigabeschritt. Siehe [PLAN.md](PLAN.md).
+Schritt 6: Rezepte im Browser anlegen, bearbeiten und vollständig anzeigen,
+lokal in IndexedDB. Zutaten lassen sich als einfacher oder doppelter Ansatz
+oder für ein gewünschtes Gesamtteiggewicht anzeigen. Der Ablauf zeigt alle
+Arbeitsschritte mit Anleitungen, Einzeldauern und Gesamtdauer. Das Grundrezept
+bleibt bei der Mengenanpassung unverändert. Start- und Zielzeiten folgen im
+nächsten Freigabeschritt. Siehe [PLAN.md](PLAN.md).
 
 ## Voraussetzungen
 
@@ -260,3 +260,43 @@ nicht erforderlich.
   Updates mit einer fehlenden ID werden abgewiesen, ohne einen neuen Datensatz anzulegen.
 - Desktop- und schmale Bearbeitungsansicht geprüft; keine Browser-Laufzeitfehler.
   Alle Browserdaten stammten aus isolierten Testkontexten, nicht aus dem Nutzerprofil.
+
+## Rezeptanzeige und Mengenanpassung (Schritt 6)
+
+- Unter der Rezeptliste stehen die Zutaten des ausgewählten Rezepts; rechts
+  erscheint dessen vollständiger Ablauf. Auf schmalen Bildschirmen stehen
+  Sammlung, Zutaten und Ablauf untereinander.
+- Die nummerierte Schrittfolge zeigt Titel, vollständige Anleitungen und
+  Einzeldauern. Die Gesamtdauer enthält alle gespeicherten Schritte, auch
+  mehrtägige Ruhezeiten. Schritte mit 0 Minuten bleiben sichtbar.
+- „1× Ansatz“ und „2× Ansatz“ wählen die Grundmenge bzw. doppelte Menge.
+  Alternativ lässt sich das gewünschte Gesamtteiggewicht mit Dezimalkomma oder
+  Dezimalpunkt eingeben (über 0 bis 100.000.000 g).
+- Alle Zutaten werden proportional aus den ursprünglichen Werten berechnet;
+  erst die Anzeige rundet auf zwei Nachkommastellen. Positive Mengen unter
+  0,01 g werden als „< 0,01 g“ angezeigt. Gerundete Einzelwerte können in der
+  Summe geringfügig vom Zielgewicht abweichen.
+- Ungültige Eingaben zeigen einen Hinweis und behalten die letzte gültige
+  Zutatenmenge bei. Die Mengenauswahl wird nicht gespeichert; Rezeptwechsel,
+  Neuladen oder Rückkehr aus dem Editor beginnen wieder beim Grundrezept.
+- Das gespeicherte Rezept, die Eingaben im Editor und die Schrittdauern bleiben
+  von der Skalierung unverändert. Uhrzeiten folgen in Schritt 7.
+- `npm run test:details` im Ordner `tests/browser` prüft die Anzeige und
+  Skalierung mit isolierten Browserdaten. Die Prüfung ist auch in `npm test`
+  und `npm run test:production` enthalten.
+
+## Verifikation von Schritt 6 (08.09.2026)
+
+- 20 gemeinsame Tests erfolgreich: zusätzlich proportionale Skalierung,
+  unveränderte Originaldaten, Dezimaleingaben, ungültige Zielgewichte,
+  Rundung sowie sehr kleine und große Mengen.
+- Web-Entwicklungsbuild, Android-Debug-Build und Web-Produktionsbuild erfolgreich.
+  Entwicklungs- und Produktionsbuild getrennt aufrufen, da die Kotlin-Wasm-
+  Aufgaben dasselbe Zwischenverzeichnis verwenden.
+- Browserprüfungen für Anlegen, Bearbeiten und die neue Anzeige gegen die
+  fertige Web-Ausgabe erfolgreich. Reihenfolge, mehrzeilige Anleitungen,
+  mehrtägige Gesamtdauer und Schritte mit 0 Minuten kontrolliert.
+- Einfacher/doppelter Ansatz, freies Zielgewicht, Fehlerkorrektur, Rezeptwechsel
+  und Neuladen geprüft. Gespeicherte Daten und Editor-Grundmengen bleiben unverändert.
+- Desktop- und schmale Zutaten-/Ablaufansicht visuell geprüft; alle Schritte
+  erreichbar, keine Browser-Laufzeitfehler. Ausschließlich isolierte Testdaten.

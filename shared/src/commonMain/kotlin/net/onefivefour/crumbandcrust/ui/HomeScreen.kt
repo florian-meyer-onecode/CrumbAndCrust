@@ -54,13 +54,17 @@ internal fun HomeScreen(
                     }
                     if (twoColumns) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(28.dp), verticalAlignment = Alignment.Top) {
-                            RecipeSection(Modifier.weight(.4f), recipes, selectedRecipe?.id, loading, loadError, onRetry,
-                                onAddRecipe, storageAvailable, onSelect = onSelectRecipe)
+                            Column(Modifier.weight(.4f)) {
+                                RecipeSection(Modifier.fillMaxWidth(), recipes, selectedRecipe?.id, loading, loadError, onRetry,
+                                    onAddRecipe, storageAvailable, onSelect = onSelectRecipe)
+                                selectedRecipe?.let { IngredientsSection(it) }
+                            }
                             ScheduleSection(Modifier.weight(.6f), selectedRecipe, onEditRecipe)
                         }
                     } else {
                         RecipeSection(Modifier.fillMaxWidth(), recipes, selectedRecipe?.id, loading, loadError, onRetry,
                             onAddRecipe, storageAvailable, onSelect = onSelectRecipe)
+                        selectedRecipe?.let { IngredientsSection(it) }
                         Spacer(Modifier.height(28.dp))
                         ScheduleSection(Modifier.fillMaxWidth(), selectedRecipe, onEditRecipe)
                     }
@@ -137,27 +141,26 @@ private fun ScheduleSection(modifier: Modifier, recipe: Recipe?, onEditRecipe: (
         Box(Modifier.height(32.dp), contentAlignment = Alignment.CenterStart) { Label("DEIN BACKPLAN", Modifier.semantics { heading() }) }
         Spacer(Modifier.height(12.dp))
         Column(Modifier.fillMaxWidth().panel().padding(26.dp)) {
-            Heading(recipe?.name ?: "Schritt für Schritt zum Brot")
-            Spacer(Modifier.height(6.dp))
-            Body(if (recipe == null) "Dein Rezept gibt den Rhythmus vor." else "In deiner Rezeptsammlung gespeichert.", small = true)
             if (recipe != null) {
-                Spacer(Modifier.height(16.dp))
-                BreadButton("Rezept bearbeiten", { onEditRecipe(recipe) }, Modifier.fillMaxWidth(), secondary = true)
+                RecipeTimeline(recipe, onEditRecipe)
+            } else {
+                Heading("Schritt für Schritt zum Brot")
+                Spacer(Modifier.height(6.dp))
+                Body("Dein Rezept gibt den Rhythmus vor.", small = true)
+                Spacer(Modifier.height(22.dp))
+                Divider()
+                Column(Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    ScheduleIllustration(Modifier.size(200.dp, 160.dp))
+                    Spacer(Modifier.height(20.dp))
+                    Heading("Noch kein Rezept ausgewählt", Modifier.fillMaxWidth(), TextAlign.Center)
+                    Spacer(Modifier.height(12.dp))
+                    Body("Wähle ein Rezept aus deiner Sammlung aus. Hier erscheint dann der Ablauf mit allen Arbeitsschritten und Ruhezeiten.",
+                        Modifier.widthIn(max = 340.dp).fillMaxWidth(), TextAlign.Center)
+                    Spacer(Modifier.height(16.dp))
+                }
+                Divider()
+                Body("Vom ersten Mischen bis zum letzten Abkühlen.", Modifier.padding(top = 16.dp), small = true)
             }
-            Spacer(Modifier.height(22.dp))
-            Divider()
-            Column(Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                ScheduleIllustration(Modifier.size(200.dp, 160.dp))
-                Spacer(Modifier.height(20.dp))
-                Heading(if (recipe == null) "Noch kein Rezept ausgewählt" else "Dein Rezept ist bereit.", Modifier.fillMaxWidth(), TextAlign.Center)
-                Spacer(Modifier.height(12.dp))
-                Body(if (recipe == null) "Wähle ein Rezept aus deiner Sammlung aus. Hier erscheint dann der Ablauf mit allen Arbeitsschritten und Ruhezeiten."
-                    else "Zutaten und Arbeitsschritte sind gespeichert. Der Backplan ist noch nicht verfügbar.",
-                    Modifier.widthIn(max = 340.dp).fillMaxWidth(), TextAlign.Center)
-                Spacer(Modifier.height(16.dp))
-            }
-            Divider()
-            Body("Vom ersten Mischen bis zum letzten Abkühlen.", Modifier.padding(top = 16.dp), small = true)
         }
     }
 }
