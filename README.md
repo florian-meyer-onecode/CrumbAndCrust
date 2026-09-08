@@ -4,12 +4,12 @@ Brotrezepte und Backabläufe mit Compose Multiplatform für Web und Android.
 
 ## Stand
 
-Schritt 6: Rezepte im Browser anlegen, bearbeiten und vollständig anzeigen,
-lokal in IndexedDB. Zutaten lassen sich als einfacher oder doppelter Ansatz
-oder für ein gewünschtes Gesamtteiggewicht anzeigen. Der Ablauf zeigt alle
-Arbeitsschritte mit Anleitungen, Einzeldauern und Gesamtdauer. Das Grundrezept
-bleibt bei der Mengenanpassung unverändert. Start- und Zielzeiten folgen im
-nächsten Freigabeschritt. Siehe [PLAN.md](PLAN.md).
+Schritt 7: Rezepte im Browser anlegen, bearbeiten und vollständig anzeigen,
+lokal in IndexedDB. Zutaten lassen sich für einen einfachen/doppelten Ansatz
+oder ein gewünschtes Gesamtteiggewicht skalieren. Eine Start- oder Zielzeit
+mit Datum berechnet Beginn und Ende jedes Schritts, einschließlich mehrtägiger
+Abläufe und Zeitumstellungen. Das gespeicherte Grundrezept bleibt unverändert.
+Alle sieben vereinbarten Umsetzungsschritte sind implementiert. Siehe [PLAN.md](PLAN.md).
 
 ## Voraussetzungen
 
@@ -300,3 +300,51 @@ nicht erforderlich.
   und Neuladen geprüft. Gespeicherte Daten und Editor-Grundmengen bleiben unverändert.
 - Desktop- und schmale Zutaten-/Ablaufansicht visuell geprüft; alle Schritte
   erreichbar, keine Browser-Laufzeitfehler. Ausschließlich isolierte Testdaten.
+
+
+## Start- und Zielplanung (Schritt 7)
+
+- Beim ausgewählten Rezept „Startzeit“ oder „Zielzeit“ wählen. Datum als
+  `TT.MM.JJJJ` und Uhrzeit als `HH:MM` im 24-Stunden-Format eingeben; die Felder
+  sind zunächst mit dem aktuellen lokalen Datum und der Uhrzeit vorausgefüllt.
+- „Planung berechnen“ erzeugt die Schrittzeiten. Startzeit ist der Beginn des
+  ersten Schritts; Zielzeit ist das Ende des letzten Schritts. Ein eingetragener
+  Abkühlschritt wird mitgerechnet. Auch Schritte mit 0 Minuten bleiben sichtbar.
+- Jeder Schritt zeigt Beginn und Ende mit vollständigem Datum. Die Zusammenfassung
+  nennt Start und Fertigstellung. UTC-Abstände machen wiederholte Uhrzeiten bei
+  der Umstellung auf Winterzeit eindeutig.
+- Es gilt die Zeitzone des Geräts, die im Formular angezeigt wird. Gerechnet wird
+  mit verstrichenen Minuten: 24 Stunden Ruhezeit bleiben auch über eine
+  Zeitumstellung hinweg 24 Stunden. Nicht existierende Uhrzeiten bei der
+  Umstellung auf Sommerzeit werden abgewiesen. Bei doppelt vorkommenden Uhrzeiten
+  wird das erste Vorkommen verwendet; der Hinweis steht im Formular.
+- Ungültige Kalenderdaten und Uhrzeiten werden markiert. Änderungen an Eingaben
+  oder Start-/Zielmodus entfernen die alte Berechnung, damit keine veralteten
+  Uhrzeiten zum neuen Entwurf angezeigt werden.
+- „Planung entfernen“ kehrt zur Anzeige der Dauern zurück. Die Planung gilt nur
+  für die aktuelle Ansicht und wird bei Rezeptwechsel, Bearbeiten oder Neuladen
+  zurückgesetzt. Rezeptdaten und Datenbankschema bleiben unverändert.
+- Mengenskalierung ändert weder die geplanten Zeiten noch die Schrittdauern.
+- Gemeinsame Zeitlogik mit `kotlinx-datetime 0.7.1`; Web-Zeitzonendaten über
+  `@js-joda/timezone 2.25.2` mit eingecheckter Yarn-Sperrdatei. Android aktiviert
+  Core-Library-Desugaring für die bestehende Mindestversion API 24.
+  Grundlage: [kotlinx-datetime-Dokumentation für Version 0.7.1](https://github.com/Kotlin/kotlinx-datetime/tree/v0.7.1).
+- `npm run test:schedule` im Ordner `tests/browser` prüft die Planung in einem
+  isolierten Browserkontext mit der Zeitzone Europe/Berlin. Auch in `npm test`
+  und `npm run test:production` enthalten.
+
+## Verifikation von Schritt 7 (08.09.2026)
+
+- 29 gemeinsame Tests erfolgreich, einschließlich Vorwärts-/Rückwärtsplanung,
+  Jahres- und Monatswechsel, Schaltjahren, Abkühl-/Null-Minuten-Schritten,
+  Eingabegrenzen und sehr langen Abläufen.
+- Sommerzeitlücken werden abgewiesen; wiederholte Herbst-Uhrzeiten verwenden das
+  erste Vorkommen. Verstrichene Dauern und UTC-Abstände gezielt geprüft.
+- Web-Entwicklungsbuild, Android-Debug-Build und Web-Produktionsbuild erfolgreich.
+  Android wurde gebaut; kein zusätzlicher Gerätetest durchgeführt.
+- Vollständige Browserprüfung für Anlegen, Bearbeiten, Rezeptanzeige,
+  Mengenskalierung und Zeitplanung gegen die fertige Web-Ausgabe erfolgreich.
+- Start-/Zielmodus, mehrtägige Schrittzeiten, ungültige Eingaben, Zeitumstellungen,
+  Entfernen der Planung, Rezeptwechsel und Neuladen im Browser geprüft.
+- Desktop- und schmale Zeitplanansicht visuell kontrolliert. Keine
+  Browser-Laufzeitfehler; alle Testdaten in isolierten Browserkontexten.

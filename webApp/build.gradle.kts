@@ -23,6 +23,7 @@ kotlin {
     }
     sourceSets {
         wasmJsMain.dependencies {
+            implementation(npm("@js-joda/timezone", "2.25.2"))
             implementation(libs.kotlinx.coroutines)
             implementation(project(":shared"))
             implementation(libs.compose.ui)

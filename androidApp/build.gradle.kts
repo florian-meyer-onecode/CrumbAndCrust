@@ -15,6 +15,7 @@ android {
         versionName = "0.1.0"
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -22,6 +23,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.android.desugar)
     implementation(project(":shared"))
     implementation(libs.androidx.activity.compose)
 }

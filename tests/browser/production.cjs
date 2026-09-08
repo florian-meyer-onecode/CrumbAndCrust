@@ -32,5 +32,6 @@ function run(script, url) {
         await run('recipes.cjs', url);
         await run('editing.cjs', url);
         await run('details.cjs', url);
+        await run('scheduling.cjs', url);
     } finally { server.close(); }
 })().catch(error => { console.error(error); server.close(); process.exitCode = 1; });

@@ -61,6 +61,7 @@ internal fun IngredientsSection(recipe: Recipe) {
 
 @Composable
 internal fun RecipeTimeline(recipe: Recipe, onEditRecipe: (Recipe) -> Unit) {
+    var plan by remember(recipe) { mutableStateOf<RecipeSchedule?>(null) }
     Heading(recipe.name)
     if (recipe.description.isNotBlank()) {
         Spacer(Modifier.height(8.dp))
@@ -68,6 +69,10 @@ internal fun RecipeTimeline(recipe: Recipe, onEditRecipe: (Recipe) -> Unit) {
     }
     Spacer(Modifier.height(16.dp))
     BreadButton("Rezept bearbeiten", { onEditRecipe(recipe) }, Modifier.fillMaxWidth(), secondary = true)
+    Spacer(Modifier.height(20.dp))
+    Divider()
+    Spacer(Modifier.height(20.dp))
+    SchedulePlanner(recipe, plan) { plan = it }
     Spacer(Modifier.height(20.dp))
     Divider()
     Spacer(Modifier.height(20.dp))
@@ -87,6 +92,13 @@ internal fun RecipeTimeline(recipe: Recipe, onEditRecipe: (Recipe) -> Unit) {
             }
             Column(Modifier.weight(1f).padding(bottom = 28.dp)) {
                 Heading(step.title)
+                plan?.let { schedule ->
+                    val timed = schedule.steps[index]
+                    Spacer(Modifier.height(8.dp))
+                    Body("Beginn: ${formatPlannedMoment(timed.start, schedule.zone)}")
+                    Body("Ende: ${formatPlannedMoment(timed.end, schedule.zone)}")
+                    Body("${formatPlanOffset(timed.start, schedule.zone)} → ${formatPlanOffset(timed.end, schedule.zone)}", small = true)
+                }
                 Spacer(Modifier.height(6.dp))
                 Label("Dauer: ${formatDuration(step.durationMinutes)}")
                 if (step.instruction.isNotBlank()) {

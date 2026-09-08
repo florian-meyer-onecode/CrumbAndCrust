@@ -60,3 +60,12 @@ Zusammenfassung. Der nächste Schritt beginnt erst nach dem OK des Nutzers.
   Skalierung, Validierung und Zeitrechnung werden mit den Funktionen ergänzt.
 - Kein Backend erforderlich; ein lokaler Entwicklungsserver liefert die
   Webdateien aus. Vollständiger Offline-Start als PWA ist ein späteres Thema.
+
+## Umsetzungsstand
+
+Alle sieben freigegebenen Schritte sind implementiert und auf `main` committed.
+Die Browser-Version speichert Rezepte lokal in IndexedDB. Mengenanpassung und
+Zeitplanung gelten für die aktuelle Ansicht; sie verändern das Grundrezept nicht.
+Android bleibt als gebautes Projektziel mit gemeinsamer Oberfläche vorbereitet,
+mit browserexklusiver Speicherung wie für diese erste Version vereinbart.
+Prüfungen und Bedienung sind in `README.md` dokumentiert.

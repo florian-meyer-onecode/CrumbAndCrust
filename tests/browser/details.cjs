@@ -22,7 +22,7 @@ const { chromium, expect, assert, path, baseURL, output, reveal, click, type, st
         for (const s of recipe.steps) await expect(page.getByRole('heading', { name: s.title, exact: true })).toBeAttached();
         await expect.poll(text).toMatch( /Dauer: 0 Min\./);
         await expect.poll(text).toMatch( /Dann das Salz unterkneten/);
-        await expect.poll(text).not.toMatch( /\b\d{2}:\d{2}\b/);
+        await expect.poll(text).not.toMatch( /Beginn: /);
         const timeline = await text();
         const positions = recipe.steps.map(s => timeline.indexOf(`heading "${s.title}"`));
         assert.ok(positions.every((p, i) => p >= 0 && (i === 0 || p > positions[i - 1])));
