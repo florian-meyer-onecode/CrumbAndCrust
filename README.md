@@ -368,3 +368,15 @@ Prüfung der Schnellwahl: 32 gemeinsame Tests, Web-Entwicklungsbuild und
 Android-Debug-Build erfolgreich. Browserprüfung für Tages-/Stundenwechsel,
 Schaltjahr, Jetzt in beiden Planungsmodi, ungültige Felder und Rücksetzen alter
 Planungen erfolgreich. Schmale Ansicht visuell geprüft; Rezeptdaten unverändert.
+
+## Kompakte Formulare
+
+- Zeitwahl mit gemeinsamer Überschrift „Datum & Uhrzeit“ und „Jetzt“ daneben.
+  Minus und Plus stehen jeweils links und rechts vom Datums- bzw. Uhrzeitfeld.
+- Zutatenname und Grammmenge stehen nebeneinander; × entfernt die jeweilige Zutat.
+- Bei Arbeitsschritten stehen Nummer, Verschieben und × in einer gemeinsamen
+  Zeile. Erstellen und Bearbeiten verwenden dieselbe kompakte Darstellung.
+- Screenreader-Beschriftungen der Felder und Symbolbuttons bleiben eindeutig.
+- Web-Entwicklungsbuild und Android-Debug-Build erfolgreich. Bestehende Browser-
+  prüfungen für Anlegen, Bearbeiten und Zeit-Schnellwahl erfolgreich; Desktop-
+  und schmale Formularansichten visuell kontrolliert. Keine Änderung der Fachlogik.

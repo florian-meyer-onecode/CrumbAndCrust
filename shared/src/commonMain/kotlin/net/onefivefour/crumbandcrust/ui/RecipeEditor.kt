@@ -69,22 +69,21 @@ internal fun RecipeEditor(existingRecipe: Recipe? = null, saving: Boolean, saveE
                         errors["ingredients"]?.let { FieldError(it) }
                         draft.ingredients.forEachIndexed { index, item ->
                             key(item.id) {
-                                Column(Modifier.fillMaxWidth().background(BreadColors.background, RoundedCornerShape(10.dp)).padding(16.dp)) {
-                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                        Label("ZUTAT ${index + 1}", Modifier.weight(1f))
-                                        BreadButton("Entfernen", { draft = draft.copy(ingredients = draft.ingredients.filterNot { it.id == item.id }) },
-                                            Modifier.semantics { contentDescription = "Zutat ${index + 1} entfernen" }, secondary = true, enabled = !saving)
-                                    }
-                                    Spacer(Modifier.height(10.dp))
-                                    RecipeField("Zutat ${index + 1}: Name *", item.name,
+                                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    RecipeField("Zutat *", item.name,
                                         { value -> draft = draft.copy(ingredients = draft.ingredients.map { if (it.id == item.id) it.copy(name = value) else it }) },
-                                        errors["${item.id}.name"], !saving, placeholder = "Zum Beispiel: Weizenmehl")
-                                    Spacer(Modifier.height(12.dp))
-                                    RecipeField("Zutat ${index + 1}: Menge in g *", item.grams,
+                                        errors["${item.id}.name"], !saving, Modifier.weight(1f), placeholder = "Weizenmehl",
+                                        accessibilityLabel = "Zutat ${index + 1}: Name *")
+                                    RecipeField("Menge (g) *", item.grams,
                                         { value -> draft = draft.copy(ingredients = draft.ingredients.map { if (it.id == item.id) it.copy(grams = value) else it }) },
-                                        errors["${item.id}.grams"], !saving, keyboardType = KeyboardType.Decimal, placeholder = "500")
+                                        errors["${item.id}.grams"], !saving, Modifier.width(96.dp), keyboardType = KeyboardType.Decimal, placeholder = "500",
+                                        accessibilityLabel = "Zutat ${index + 1}: Menge in g *")
+                                    BreadButton("×", { draft = draft.copy(ingredients = draft.ingredients.filterNot { it.id == item.id }) },
+                                        Modifier.padding(top = 24.dp).width(54.dp).semantics { contentDescription = "Zutat ${index + 1} entfernen" },
+                                        secondary = true, enabled = !saving)
                                 }
-                                Spacer(Modifier.height(12.dp))
+                                Divider()
+                                Spacer(Modifier.height(4.dp))
                             }
                         }
                         BreadButton("Zutat hinzufügen", { draft = draft.copy(ingredients = draft.ingredients + IngredientDraft()) },
@@ -98,22 +97,22 @@ internal fun RecipeEditor(existingRecipe: Recipe? = null, saving: Boolean, saveE
                         draft.steps.forEachIndexed { index, step ->
                             key(step.id) {
                                 Column(Modifier.fillMaxWidth().background(BreadColors.background, RoundedCornerShape(10.dp)).padding(16.dp)) {
-                                    Label("SCHRITT ${index + 1}")
-                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        BreadButton("↑", { draft = draft.moveStep(step.id, -1) }, Modifier.weight(1f)
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Label("SCHRITT ${index + 1}", Modifier.weight(1f))
+                                        BreadButton("↑", { draft = draft.moveStep(step.id, -1) }, Modifier.width(54.dp)
                                             .semantics { contentDescription = "Schritt ${index + 1} nach oben" }, secondary = true, enabled = !saving && index > 0)
-                                        BreadButton("↓", { draft = draft.moveStep(step.id, 1) }, Modifier.weight(1f)
+                                        BreadButton("↓", { draft = draft.moveStep(step.id, 1) }, Modifier.width(54.dp)
                                             .semantics { contentDescription = "Schritt ${index + 1} nach unten" }, secondary = true, enabled = !saving && index < draft.steps.lastIndex)
-                                        BreadButton("Entfernen", { draft = draft.copy(steps = draft.steps.filterNot { it.id == step.id }) },
-                                            Modifier.semantics { contentDescription = "Schritt ${index + 1} entfernen" }, secondary = true, enabled = !saving)
+                                        BreadButton("×", { draft = draft.copy(steps = draft.steps.filterNot { it.id == step.id }) },
+                                            Modifier.width(54.dp).semantics { contentDescription = "Schritt ${index + 1} entfernen" }, secondary = true, enabled = !saving)
                                     }
                                     Spacer(Modifier.height(10.dp))
                                     fun update(transform: (StepDraft) -> StepDraft) { draft = draft.copy(steps = draft.steps.map { if (it.id == step.id) transform(it) else it }) }
-                                    RecipeField("Schritt ${index + 1}: Titel *", step.title, { value -> update { it.copy(title = value) } },
-                                        errors["${step.id}.title"], !saving, placeholder = "Zum Beispiel: Teig mischen")
+                                    RecipeField("Titel *", step.title, { value -> update { it.copy(title = value) } },
+                                        errors["${step.id}.title"], !saving, placeholder = "Zum Beispiel: Teig mischen", accessibilityLabel = "Schritt ${index + 1}: Titel *")
                                     Spacer(Modifier.height(12.dp))
-                                    RecipeField("Schritt ${index + 1}: Anleitung", step.instruction, { value -> update { it.copy(instruction = value) } },
-                                        errors["${step.id}.instruction"], !saving, multiline = true, placeholder = "Was ist zu tun? (optional)")
+                                    RecipeField("Anleitung", step.instruction, { value -> update { it.copy(instruction = value) } },
+                                        errors["${step.id}.instruction"], !saving, multiline = true, placeholder = "Was ist zu tun? (optional)", accessibilityLabel = "Schritt ${index + 1}: Anleitung")
                                     Spacer(Modifier.height(12.dp))
                                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                         RecipeField("Stunden *", step.hours, { value -> update { it.copy(hours = value) } }, errors["${step.id}.hours"], !saving,
@@ -164,13 +163,15 @@ private fun EditorSection(number: String, title: String, content: @Composable Co
 internal fun RecipeField(
     label: String, value: String, onValueChange: (String) -> Unit, errorMessage: String?, enabled: Boolean,
     modifier: Modifier = Modifier, multiline: Boolean = false, keyboardType: KeyboardType = KeyboardType.Text,
-    placeholder: String = "", accessibilityLabel: String = label,
+    placeholder: String = "", accessibilityLabel: String = label, showLabel: Boolean = true,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     Column(modifier.fillMaxWidth()) {
-        Body(label)
-        Spacer(Modifier.height(6.dp))
+        if (showLabel) {
+            Body(label)
+            Spacer(Modifier.height(6.dp))
+        }
         BasicTextField(
             value = value, onValueChange = onValueChange, enabled = enabled, singleLine = !multiline,
             interactionSource = interaction,

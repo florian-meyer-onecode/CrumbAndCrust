@@ -3,6 +3,7 @@ package net.onefivefour.crumbandcrust.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.*
@@ -41,22 +42,29 @@ internal fun SchedulePlanner(recipe: Recipe, plan: RecipeSchedule?, onPlan: (Rec
         BreadButton("Zielzeit", { mode = PlanAnchor.FINISH; invalidate() }, Modifier.weight(1f).semantics { selected = mode == PlanAnchor.FINISH }, secondary = mode != PlanAnchor.FINISH)
     }
     Spacer(Modifier.height(12.dp))
-    BreadButton("Jetzt", { setMoment(Clock.System.now().toLocalDateTime(zone)) }, Modifier.fillMaxWidth(), secondary = true)
-    Spacer(Modifier.height(12.dp))
-    RecipeField("Datum (TT.MM.JJJJ)", dateText, { dateText = it; invalidate() },
-        if (attempted && date == null) "Gib ein gültiges Datum ein, z. B. 09.09.2026." else null, true)
-    Spacer(Modifier.height(12.dp))
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        BreadButton("−1 Tag", { previousDay?.let { dateText = formatPlanDate(it); invalidate() } }, Modifier.weight(1f), secondary = true, enabled = previousDay != null)
-        BreadButton("+1 Tag", { nextDay?.let { dateText = formatPlanDate(it); invalidate() } }, Modifier.weight(1f), secondary = true, enabled = nextDay != null)
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Body("Datum & Uhrzeit", Modifier.weight(1f))
+        BreadButton("Jetzt", { setMoment(Clock.System.now().toLocalDateTime(zone)) }, secondary = true)
     }
-    Spacer(Modifier.height(12.dp))
-    RecipeField("Uhrzeit (HH:MM)", timeText, { timeText = it; invalidate() },
-        if (attempted && time == null) "Gib eine Uhrzeit von 00:00 bis 23:59 ein." else null, true)
-    Spacer(Modifier.height(12.dp))
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        BreadButton("−1 Stunde", { previousHour?.let { setMoment(it) } }, Modifier.weight(1f), secondary = true, enabled = previousHour != null)
-        BreadButton("+1 Stunde", { nextHour?.let { setMoment(it) } }, Modifier.weight(1f), secondary = true, enabled = nextHour != null)
+    Spacer(Modifier.height(6.dp))
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        BreadButton("−", { previousDay?.let { dateText = formatPlanDate(it); invalidate() } },
+            Modifier.width(54.dp).semantics { contentDescription = "−1 Tag" }, secondary = true, enabled = previousDay != null)
+        RecipeField("Datum (TT.MM.JJJJ)", dateText, { dateText = it; invalidate() },
+            if (attempted && date == null) "Gib ein gültiges Datum ein, z. B. 09.09.2026." else null, true,
+            Modifier.weight(1f), showLabel = false)
+        BreadButton("+", { nextDay?.let { dateText = formatPlanDate(it); invalidate() } },
+            Modifier.width(54.dp).semantics { contentDescription = "+1 Tag" }, secondary = true, enabled = nextDay != null)
+    }
+    Spacer(Modifier.height(6.dp))
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        BreadButton("−", { previousHour?.let { setMoment(it) } },
+            Modifier.width(54.dp).semantics { contentDescription = "−1 Stunde" }, secondary = true, enabled = previousHour != null)
+        RecipeField("Uhrzeit (HH:MM)", timeText, { timeText = it; invalidate() },
+            if (attempted && time == null) "Gib eine Uhrzeit von 00:00 bis 23:59 ein." else null, true,
+            Modifier.weight(1f), showLabel = false)
+        BreadButton("+", { nextHour?.let { setMoment(it) } },
+            Modifier.width(54.dp).semantics { contentDescription = "+1 Stunde" }, secondary = true, enabled = nextHour != null)
     }
     Spacer(Modifier.height(12.dp))
     BreadButton("Planung berechnen", {
