@@ -107,4 +107,33 @@ class RecipeScheduleTest {
         assertEquals(LocalTime(2, 30), local.time)
         assertFailsWith<IllegalArgumentException> { resolvePlanAnchor(local.date, local.time, zone) }
     }
+    @Test fun timelineLabelsUseCalendarDaysAcrossYearBoundary() {
+        val today = LocalDate(2026, 12, 31)
+        listOf(
+            Triple("31.12.2026", "23:59", "23:59"),
+            Triple("01.01.2027", "00:01", "morgen · 00:01"),
+            Triple("02.01.2027", "08:00", "Übermorgen · 08:00"),
+            Triple("03.01.2027", "09:00", "in 3 Tagen · 09:00"),
+            Triple("10.01.2027", "09:00", "in 10 Tagen · 09:00"),
+            Triple("30.12.2026", "12:00", "30.12.2026 · 12:00")
+        ).forEach { (date, time, expected) ->
+            assertEquals(expected, formatTimelineMoment(anchor(date, time), zone, today))
+        }
+    }
+
+    @Test fun timelineLabelsFollowBothPlanningDirectionsAndLocalDates() {
+        val today = LocalDate(2026, 12, 31)
+        val forward = recipe.schedule(anchor("31.12.2026", "23:30"), PlanAnchor.START, zone)
+        val backward = recipe.schedule(forward.end, PlanAnchor.FINISH, zone)
+        for (plan in listOf(forward, backward)) {
+            assertEquals("23:30", formatTimelineMoment(plan.steps.first().start, zone, today))
+            assertEquals("Übermorgen · 02:30", formatTimelineMoment(plan.end, zone, today))
+        }
+        assertEquals("morgen · 00:30", formatTimelineMoment(
+            Instant.parse("2026-12-31T23:30:00Z"), zone, today))
+        assertEquals("Übermorgen · 00:00", formatTimelineMoment(
+            anchor("30.03.2026", "00:00"), zone, LocalDate(2026, 3, 28)))
+        assertEquals("Übermorgen · 00:00", formatTimelineMoment(
+            anchor("26.10.2026", "00:00"), zone, LocalDate(2026, 10, 24)))
+    }
 }

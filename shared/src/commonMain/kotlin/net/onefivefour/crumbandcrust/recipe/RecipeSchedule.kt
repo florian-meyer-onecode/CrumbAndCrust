@@ -69,3 +69,17 @@ fun shiftPlanHour(date: LocalDate, time: LocalTime, hours: Int): LocalDateTime? 
     } ?: return null
     return LocalDateTime(shiftedDate, LocalTime((hour + 24) % 24, time.minute))
 }
+
+// Compare calendar dates, not elapsed 24-hour periods (including DST changes).
+fun formatTimelineMoment(instant: Instant, zone: TimeZone, today: LocalDate): String {
+    val local = instant.toLocalDateTime(zone)
+    val days = today.daysUntil(local.date)
+    val prefix = when (days) {
+        0 -> ""
+        1 -> "morgen · "
+        2 -> "Übermorgen · "
+        in 3..Int.MAX_VALUE -> "in $days Tagen · "
+        else -> "${formatPlanDate(local.date)} · "
+    }
+    return prefix + formatPlanTime(local.time)
+}

@@ -12,6 +12,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.onefivefour.crumbandcrust.recipe.*
+import kotlinx.datetime.*
+import kotlinx.coroutines.delay
+import kotlin.time.Clock
 
 @Composable
 internal fun IngredientsSection(recipe: Recipe) {
@@ -62,6 +65,13 @@ internal fun IngredientsSection(recipe: Recipe) {
 @Composable
 internal fun RecipeTimeline(recipe: Recipe, onEditRecipe: (Recipe) -> Unit) {
     var plan by remember(recipe) { mutableStateOf<RecipeSchedule?>(null) }
+    val zone = plan?.zone ?: TimeZone.currentSystemDefault()
+    val today by produceState(Clock.System.now().toLocalDateTime(zone).date, zone) {
+        while (true) {
+            value = Clock.System.now().toLocalDateTime(zone).date
+            delay(30_000)
+        }
+    }
     Heading(recipe.name)
     if (recipe.description.isNotBlank()) {
         Spacer(Modifier.height(8.dp))
@@ -91,12 +101,16 @@ internal fun RecipeTimeline(recipe: Recipe, onEditRecipe: (Recipe) -> Unit) {
                 if (index < recipe.steps.lastIndex) Box(Modifier.width(2.dp).weight(1f).background(BreadColors.line))
             }
             Column(Modifier.weight(1f).padding(bottom = 28.dp)) {
+                plan?.let { schedule ->
+                    Label(formatTimelineMoment(schedule.steps[index].start, schedule.zone, today))
+                    Spacer(Modifier.height(6.dp))
+                }
                 Heading(step.title)
                 plan?.let { schedule ->
                     val timed = schedule.steps[index]
                     Spacer(Modifier.height(8.dp))
-                    Body("Beginn: ${formatPlannedMoment(timed.start, schedule.zone)}")
-                    Body("Ende: ${formatPlannedMoment(timed.end, schedule.zone)}")
+                    Body("Beginn: ${formatTimelineMoment(timed.start, schedule.zone, today)}")
+                    Body("Ende: ${formatTimelineMoment(timed.end, schedule.zone, today)}")
                     Body("${formatPlanOffset(timed.start, schedule.zone)} → ${formatPlanOffset(timed.end, schedule.zone)}", small = true)
                 }
                 Spacer(Modifier.height(6.dp))
